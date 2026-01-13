@@ -19,5 +19,5 @@
 
 ## Architecture Constraints
 - **Separation of Concerns**: Keep LLM logic (chains/prompts) separate from API route handlers.
-- **State Management**: The Interview State Machine is strict. [cite_start]An interview cannot move to `IN_PROGRESS` without `match_analysis` being present[cite: 300].
+- **State Management**: The Interview State Machine is strict. An interview cannot move to `IN_PROGRESS` without `match_analysis` being present.
 - **Formatting**: Use Black/Ruff for Python and Prettier for JS.

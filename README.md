@@ -27,7 +27,7 @@ chmod +x install-python311.sh
 ./install-python311.sh
 ```
 
-For detailed setup instructions, see [SETUP.md](SETUP.md).
+For detailed setup instructions, see [docs/setup.md](docs/setup.md).
 
 ## 📁 Project Structure
 
@@ -37,27 +37,25 @@ ai-interviewer/
 │   ├── app/
 │   │   ├── models/            # SQLAlchemy models
 │   │   ├── schemas/           # Pydantic schemas
-│   │   ├── api/               # API endpoints (coming soon)
-│   │   ├── agents/            # LangChain agents (coming soon)
-│   │   ├── services/          # Business logic (coming soon)
-│   │   ├── utils/             # Utilities (state machine)
+│   │   ├── api/               # API endpoints
+│   │   ├── agents/            # LangChain agents
+│   │   ├── services/          # Business logic
+│   │   ├── utils/             # Utilities (state machine, file upload)
 │   │   ├── config.py          # Configuration
 │   │   ├── database.py        # Database session
 │   │   └── main.py            # FastAPI app
 │   ├── alembic/               # Database migrations
-│   ├── tests/                 # Unit tests
+│   ├── tests/                 # Unit and integration tests
 │   ├── pyproject.toml         # Poetry dependencies
 │   └── README.md
 │
 ├── frontend/                   # React TypeScript frontend
 │   ├── src/
-│   │   ├── components/        # React components (coming soon)
-│   │   ├── pages/             # Page components (coming soon)
-│   │   ├── services/          # API client (coming soon)
-│   │   ├── hooks/             # Custom hooks (coming soon)
-│   │   ├── types/             # TypeScript types (coming soon)
-│   │   ├── App.tsx            # Main app
-│   │   └── main.tsx           # Entry point
+│   │   ├── api/               # API client
+│   │   ├── pages/             # Page components
+│   │   ├── App.tsx            # Main app with routing
+│   │   ├── main.tsx           # Entry point
+│   │   └── index.css          # Global styles
 │   ├── package.json           # npm dependencies
 │   └── README.md
 │
@@ -72,8 +70,7 @@ ai-interviewer/
 ├── setup-backend.sh            # Backend setup script
 ├── setup-frontend.sh           # Frontend setup script
 ├── install-python311.sh        # Python 3.11 installer
-├── SETUP.md                    # Setup guide
-├── PYTHON_VERSION_FIX.md       # Python troubleshooting
+├── commit.sh                   # Git commit helper
 └── README.md                   # This file
 ```
 
@@ -214,8 +211,8 @@ Current coverage areas:
 - ✅ Input validators (Pydantic)
 - ✅ Agent initialization
 - ✅ Error handling
-- ⏳ API endpoints (Phase 4)
-- ⏳ Frontend components (Phase 5)
+- ✅ API endpoints
+- ✅ Frontend components
 
 ## 📚 Documentation
 
@@ -273,7 +270,7 @@ Current coverage areas:
 - **Error Handling**: Retry logic and graceful failures
 - **Logging**: Structured logs for debugging
 
-See [ARCHITECTURE_REVIEW.md](ARCHITECTURE_REVIEW.md) for detailed analysis and improvement recommendations.
+See [docs/architecture_review.md](docs/architecture_review.md) and [docs/code_review.md](docs/code_review.md) for detailed analysis and improvement recommendations.
 
 ## 🛠️ Development
 
