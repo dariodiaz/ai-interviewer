@@ -110,30 +110,49 @@ DRAFT → READY → ASSIGNED → IN_PROGRESS → COMPLETED
 
 ### Implemented ✅
 
-- Backend infrastructure (FastAPI + SQLAlchemy)
-- Frontend infrastructure (React + TypeScript + Vite)
-- Database models with state machine
+**Phase 1 & 2: Infrastructure**
+- Backend infrastructure (FastAPI + SQLAlchemy async)
+- Frontend infrastructure (React + TypeScript + Vite + TailwindCSS)
+- Database models with 5-state machine validation
 - Alembic migrations
 - Pydantic schemas for API contracts
 - Development environment setup scripts
 - Unit tests for models and state machine
 
+**Phase 3: LangChain Agents** 🆕
+- **Document Analysis Agent**: Analyzes resume/role/job offering match with scoring
+- **Answer Evaluation Agent**: Scores answers (1-10) with detailed rationale
+- **Question Generation Agent**: Generates adaptive questions based on difficulty
+- **Message Classification Agent**: Classifies messages as Answer/Clarification/OffTopic
+- **Report Generation Agent**: Creates comprehensive final reports with integrity flags
+- **Integrity Judgment Agent**: Optional per-message integrity assessment
+- **LLM Factory**: Multi-provider support (OpenAI, Gemini, Ollama)
+- **Base Agent Class**: Retry logic, error handling, and logging
+- **Input Validators**: Pydantic validators for all agent inputs
+- **Comprehensive Tests**: Unit tests with mocking and validation tests
+
+### Architecture Improvements ✅
+
+- **Error Handling**: Automatic retry with exponential backoff (3 attempts)
+- **Input Validation**: Pydantic validators prevent invalid data from reaching LLMs
+- **Structured Logging**: Detailed logging for debugging and monitoring
+- **Type Safety**: Full type hints and Pydantic schemas throughout
+- **Testability**: Mockable agents with clear interfaces
+- **Cost Awareness**: Token usage estimation in logs
+
 ### In Progress 🚧
 
-- LangChain agents (Phase 3)
 - API endpoints (Phase 4)
 - Frontend components (Phase 5)
 
 ### Planned 📋
 
-- Document analysis agent
-- Answer evaluation agent
-- Question generation agent
-- Message classification agent
-- Report generation agent
 - Admin dashboard
 - Candidate interview interface
 - End-to-end testing
+- Caching layer
+- Rate limiting
+- Cost tracking
 
 ## 🧪 Testing
 
@@ -141,8 +160,28 @@ DRAFT → READY → ASSIGNED → IN_PROGRESS → COMPLETED
 
 ```bash
 cd backend
+
+# Run all tests
 poetry run pytest -v
+
+# Run with coverage
+poetry run pytest --cov=app --cov-report=html
+
+# Run specific test file
+poetry run pytest tests/test_agents.py -v
+
+# Run specific test class
+poetry run pytest tests/test_agents.py::TestInputValidators -v
+
+# Skip integration tests (require LLM API)
+poetry run pytest -v -m "not skip"
 ```
+
+### Test Categories
+
+- **Unit Tests**: Models, state machine, validators
+- **Agent Tests**: Input validation, initialization, mocking
+- **Integration Tests**: Skipped by default (require LLM API keys)
 
 ### Run Frontend Tests
 
@@ -151,13 +190,68 @@ cd frontend
 npm test
 ```
 
+### Test Coverage
+
+Current coverage areas:
+- ✅ Database models and state machine
+- ✅ Input validators (Pydantic)
+- ✅ Agent initialization
+- ✅ Error handling
+- ⏳ API endpoints (Phase 4)
+- ⏳ Frontend components (Phase 5)
+
 ## 📚 Documentation
 
 - **[SETUP.md](SETUP.md)** - Complete setup and testing guide
 - **[PYTHON_VERSION_FIX.md](PYTHON_VERSION_FIX.md)** - Python version troubleshooting
+- **[ARCHITECTURE_REVIEW.md](ARCHITECTURE_REVIEW.md)** - Architecture review and improvements
 - **[docs/agents.md](docs/agents.md)** - LangChain agent specifications
 - **[docs/instructions.md](docs/instructions.md)** - Development guidelines
 - **[docs/project_roadmap.md](docs/project_roadmap.md)** - Project roadmap
+
+## 🏛️ Architecture & Best Practices
+
+### Design Principles
+
+✅ **Separation of Concerns**
+- Clear boundaries between models, schemas, agents, and APIs
+- Each agent has a single, well-defined responsibility
+
+✅ **Type Safety**
+- Pydantic schemas for all data structures
+- Type hints throughout the codebase
+- Structured LLM outputs prevent parsing errors
+
+✅ **Error Handling**
+- Automatic retry with exponential backoff
+- Graceful degradation on failures
+- Detailed error logging
+
+✅ **Input Validation**
+- Pydantic validators for all agent inputs
+- Prevents invalid data from reaching LLMs
+- Clear validation error messages
+
+✅ **Testability**
+- Mockable dependencies
+- Clear interfaces
+- Comprehensive test coverage
+
+✅ **Observability**
+- Structured logging for all agent operations
+- Token usage estimation
+- Performance tracking
+
+### Code Quality Standards
+
+- **Type Safety**: All functions have type hints
+- **Documentation**: Docstrings for all public APIs
+- **Testing**: Unit tests for all core functionality
+- **Validation**: Input validation before LLM calls
+- **Error Handling**: Retry logic and graceful failures
+- **Logging**: Structured logs for debugging
+
+See [ARCHITECTURE_REVIEW.md](ARCHITECTURE_REVIEW.md) for detailed analysis and improvement recommendations.
 
 ## 🛠️ Development
 
