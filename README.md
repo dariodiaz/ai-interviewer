@@ -1,1 +1,229 @@
 # AI Interviewer Chatbot
+
+AI-powered technical interview platform that conducts adaptive interviews, evaluates answers, and generates comprehensive reports.
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Python 3.11+**
+- **Node.js 18+** and npm
+- **Docker** and Docker Compose
+- **Git**
+
+### Setup
+
+Run the automated setup script:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+If you don't have Python 3.11, install it first:
+
+```bash
+chmod +x install-python311.sh
+./install-python311.sh
+```
+
+For detailed setup instructions, see [SETUP.md](SETUP.md).
+
+## 📁 Project Structure
+
+```
+ai-interviewer/
+├── backend/                    # Python FastAPI backend
+│   ├── app/
+│   │   ├── models/            # SQLAlchemy models
+│   │   ├── schemas/           # Pydantic schemas
+│   │   ├── api/               # API endpoints (coming soon)
+│   │   ├── agents/            # LangChain agents (coming soon)
+│   │   ├── services/          # Business logic (coming soon)
+│   │   ├── utils/             # Utilities (state machine)
+│   │   ├── config.py          # Configuration
+│   │   ├── database.py        # Database session
+│   │   └── main.py            # FastAPI app
+│   ├── alembic/               # Database migrations
+│   ├── tests/                 # Unit tests
+│   ├── pyproject.toml         # Poetry dependencies
+│   └── README.md
+│
+├── frontend/                   # React TypeScript frontend
+│   ├── src/
+│   │   ├── components/        # React components (coming soon)
+│   │   ├── pages/             # Page components (coming soon)
+│   │   ├── services/          # API client (coming soon)
+│   │   ├── hooks/             # Custom hooks (coming soon)
+│   │   ├── types/             # TypeScript types (coming soon)
+│   │   ├── App.tsx            # Main app
+│   │   └── main.tsx           # Entry point
+│   ├── package.json           # npm dependencies
+│   └── README.md
+│
+├── docs/                       # Documentation
+│   ├── agents.md              # Agent specifications
+│   ├── database.md            # Database schema
+│   ├── instructions.md        # Development guidelines
+│   └── project_roadmap.md     # Project roadmap
+│
+├── docker-compose.yml          # PostgreSQL container
+├── setup.sh                    # Complete setup script
+├── setup-backend.sh            # Backend setup script
+├── setup-frontend.sh           # Frontend setup script
+├── install-python311.sh        # Python 3.11 installer
+├── SETUP.md                    # Setup guide
+├── PYTHON_VERSION_FIX.md       # Python troubleshooting
+└── README.md                   # This file
+```
+
+## 🏗️ Architecture
+
+### Backend (Python + FastAPI)
+
+- **Framework**: FastAPI with async support
+- **Database**: PostgreSQL with SQLAlchemy (async)
+- **LLM Framework**: LangChain
+- **Migrations**: Alembic
+- **Testing**: Pytest
+
+### Frontend (React + TypeScript)
+
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: TailwindCSS
+- **Routing**: React Router
+- **HTTP Client**: Axios
+
+### Database Schema
+
+- **interviews**: Interview sessions with state machine
+- **messages**: Chat transcript with telemetry
+
+### State Machine
+
+```
+DRAFT → READY → ASSIGNED → IN_PROGRESS → COMPLETED
+```
+
+## 🎯 Features
+
+### Implemented ✅
+
+- Backend infrastructure (FastAPI + SQLAlchemy)
+- Frontend infrastructure (React + TypeScript + Vite)
+- Database models with state machine
+- Alembic migrations
+- Pydantic schemas for API contracts
+- Development environment setup scripts
+- Unit tests for models and state machine
+
+### In Progress 🚧
+
+- LangChain agents (Phase 3)
+- API endpoints (Phase 4)
+- Frontend components (Phase 5)
+
+### Planned 📋
+
+- Document analysis agent
+- Answer evaluation agent
+- Question generation agent
+- Message classification agent
+- Report generation agent
+- Admin dashboard
+- Candidate interview interface
+- End-to-end testing
+
+## 🧪 Testing
+
+### Run Backend Tests
+
+```bash
+cd backend
+poetry run pytest -v
+```
+
+### Run Frontend Tests
+
+```bash
+cd frontend
+npm test
+```
+
+## 📚 Documentation
+
+- **[SETUP.md](SETUP.md)** - Complete setup and testing guide
+- **[PYTHON_VERSION_FIX.md](PYTHON_VERSION_FIX.md)** - Python version troubleshooting
+- **[docs/agents.md](docs/agents.md)** - LangChain agent specifications
+- **[docs/instructions.md](docs/instructions.md)** - Development guidelines
+- **[docs/project_roadmap.md](docs/project_roadmap.md)** - Project roadmap
+
+## 🛠️ Development
+
+### Start Backend
+
+```bash
+cd backend
+poetry run uvicorn app.main:app --reload
+```
+
+API available at:
+- http://localhost:8000
+- http://localhost:8000/docs (Swagger)
+
+### Start Frontend
+
+```bash
+cd frontend
+npm run dev
+```
+
+App available at: http://localhost:5173
+
+### Database Management
+
+```bash
+# Start PostgreSQL
+docker-compose up -d
+
+# Stop PostgreSQL
+docker-compose down
+
+# Reset database
+docker-compose down -v
+docker-compose up -d
+cd backend
+poetry run alembic upgrade head
+```
+
+### Code Quality
+
+```bash
+# Backend
+cd backend
+poetry run black .
+poetry run ruff --fix .
+poetry run mypy .
+
+# Frontend
+cd frontend
+npm run lint
+```
+
+## 🤝 Contributing
+
+1. Follow the coding standards in [docs/instructions.md](docs/instructions.md)
+2. Write tests for new features
+3. Use conventional commits
+4. Ensure all tests pass before committing
+
+## 📝 License
+
+This is a training project.
+
+## 🔗 Related Documents
+
+- [Implementation Plan](C:\Users\DDiaz\.gemini\antigravity\brain\938daba1-15c7-4cba-b07c-9990876fa01e\implementation_plan.md)
+- [Task Breakdown](C:\Users\DDiaz\.gemini\antigravity\brain\938daba1-15c7-4cba-b07c-9990876fa01e\task.md)
+- [Workflow Reference](C:\Users\DDiaz\.gemini\antigravity\brain\938daba1-15c7-4cba-b07c-9990876fa01e\workflow_reference.md)
