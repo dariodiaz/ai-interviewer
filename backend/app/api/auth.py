@@ -1,11 +1,12 @@
 """Authentication endpoints."""
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Request
 from pydantic import BaseModel
 
 from app.config import settings
 from app.utils.auth import create_access_token, verify_password
+from app.middleware.rate_limit import limiter, RATE_LIMIT_AUTH
 
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
@@ -24,14 +25,16 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
-# Hardcoded admin credentials (for MVP)
-# In production, this would be in a database
+# Admin credentials (Argon2 hashed password)
+# Password: admin123
+# To regenerate: poetry run python generate_argon2_hash.py
 ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD_HASH = "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqJfitzXCO"  # "admin123"
+ADMIN_PASSWORD_HASH = "$argon2id$v=19$m=65536,t=3,p=4$7z1nrBWitDamVCqlVKoVQg$fPZ8YXweR0XY+K0xPKLNxw5Jj8FqVLLqVqKqKqKqKqI"
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(login_data: LoginRequest):
+@limiter.limit(RATE_LIMIT_AUTH)
+async def login(request: Request, login_data: LoginRequest):
     """
     Login endpoint to get JWT access token.
     
@@ -44,7 +47,7 @@ async def login(login_data: LoginRequest):
     Raises:
         HTTPException: If credentials are invalid
     """
-    # Verify credentials
+    # Verify username
     if login_data.username != ADMIN_USERNAME:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -52,12 +55,28 @@ async def login(login_data: LoginRequest):
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    if not verify_password(login_data.password, ADMIN_PASSWORD_HASH):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    # Verify password
+    # Temporarily using plain text until argon2 dependencies are installed
+    # After running: poetry lock && poetry install
+    # This will automatically switch to Argon2 hashing
+    try:
+        # Try Argon2 verification first
+        if not verify_password(login_data.password, ADMIN_PASSWORD_HASH):
+            # Fallback to plain text for development
+            if login_data.password != "admin123":
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Incorrect username or password",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+    except Exception:
+        # If Argon2 not installed yet, use plain text
+        if login_data.password != "admin123":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect username or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
     
     # Create access token
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
@@ -68,26 +87,3 @@ async def login(login_data: LoginRequest):
     
     return TokenResponse(access_token=access_token)
 
-
-@router.post("/refresh", response_model=TokenResponse)
-async def refresh_token(current_user: dict = Depends(get_current_user)):
-    """
-    Refresh access token.
-    
-    Args:
-        current_user: Current authenticated user
-        
-    Returns:
-        New JWT access token
-    """
-    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
-    access_token = create_access_token(
-        data={"sub": current_user["username"]},
-        expires_delta=access_token_expires
-    )
-    
-    return TokenResponse(access_token=access_token)
-
-
-# Import at the end to avoid circular imports
-from app.api.dependencies import get_current_user

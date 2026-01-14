@@ -1,9 +1,10 @@
 """Interview API endpoints."""
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import require_admin
 from app.database import get_db
+from app.middleware.rate_limit import limiter, RATE_LIMIT_ADMIN
 from app.schemas.interview import (
     InterviewCreate,
     InterviewResponse,
@@ -21,7 +22,9 @@ router = APIRouter(prefix="/interviews", tags=["interviews"])
 
 
 @router.post("/", response_model=InterviewResponse, status_code=201)
+@limiter.limit(RATE_LIMIT_ADMIN)
 async def create_interview(
+    request: Request,
     interview_data: InterviewCreate,
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(require_admin),
@@ -41,7 +44,9 @@ async def create_interview(
 
 
 @router.get("/", response_model=list[InterviewListResponse])
+@limiter.limit(RATE_LIMIT_ADMIN)
 async def list_interviews(
+    request: Request,
     skip: int = 0,
     limit: int = 100,
     db: AsyncSession = Depends(get_db),
@@ -73,7 +78,9 @@ async def list_interviews(
 
 
 @router.get("/{interview_id}", response_model=InterviewResponse)
+@limiter.limit(RATE_LIMIT_ADMIN)
 async def get_interview(
+    request: Request,
     interview_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(require_admin),
@@ -100,7 +107,9 @@ async def get_interview(
 
 
 @router.post("/{interview_id}/upload", response_model=InterviewResponse)
+@limiter.limit(RATE_LIMIT_ADMIN)
 async def upload_documents(
+    request: Request,
     interview_id: int,
     resume: UploadFile = File(..., description="Candidate resume (PDF)"),
     role_description: UploadFile = File(..., description="Role description (PDF)"),
@@ -168,7 +177,9 @@ async def upload_documents(
 
 
 @router.post("/{interview_id}/assign", response_model=InterviewResponse)
+@limiter.limit(RATE_LIMIT_ADMIN)
 async def assign_interview(
+    request: Request,
     interview_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(require_admin),
@@ -194,7 +205,9 @@ async def assign_interview(
 
 
 @router.post("/{interview_id}/complete", response_model=InterviewResponse)
+@limiter.limit(RATE_LIMIT_ADMIN)
 async def complete_interview(
+    request: Request,
     interview_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(require_admin),

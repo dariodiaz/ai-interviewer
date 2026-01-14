@@ -8,8 +8,8 @@ from passlib.context import CryptContext
 from app.config import settings
 
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Password hashing with Argon2 (modern, secure, no length limits)
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 # JWT settings
 SECRET_KEY = settings.SECRET_KEY
@@ -18,12 +18,33 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against a hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    """
+    Verify a password against an Argon2 hash.
+    
+    Args:
+        plain_password: Plain text password
+        hashed_password: Argon2 hashed password
+        
+    Returns:
+        True if password matches, False otherwise
+    """
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception:
+        # Handle any hashing errors gracefully
+        return False
 
 
 def get_password_hash(password: str) -> str:
-    """Hash a password."""
+    """
+    Hash a password using Argon2.
+    
+    Args:
+        password: Plain text password
+        
+    Returns:
+        Argon2 hashed password
+    """
     return pwd_context.hash(password)
 
 

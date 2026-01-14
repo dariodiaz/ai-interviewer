@@ -1,9 +1,10 @@
 """Message/Chat API endpoints."""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents import generate_introduction
 from app.database import get_db
+from app.middleware.rate_limit import limiter, RATE_LIMIT_CHAT
 from app.schemas.message import CandidateMessageSubmit, MessageResponse
 from app.services import InterviewService, MessageService
 
@@ -11,7 +12,9 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 @router.post("/start/{token}")
+@limiter.limit(RATE_LIMIT_CHAT)
 async def start_interview(
+    request: Request,
     token: str,
     db: AsyncSession = Depends(get_db),
 ):
@@ -90,7 +93,9 @@ async def start_interview(
 
 
 @router.get("/{interview_id}/messages", response_model=list[MessageResponse])
+@limiter.limit(RATE_LIMIT_CHAT)
 async def get_messages(
+    request: Request,
     interview_id: int,
     db: AsyncSession = Depends(get_db),
 ):
@@ -109,7 +114,9 @@ async def get_messages(
 
 
 @router.post("/{interview_id}/message")
+@limiter.limit(RATE_LIMIT_CHAT)
 async def send_message(
+    request: Request,
     interview_id: int,
     message: CandidateMessageSubmit,
     db: AsyncSession = Depends(get_db),

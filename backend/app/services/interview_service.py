@@ -142,34 +142,29 @@ class InterviewService:
             interview_id: Interview ID
 
         Returns:
-        await self.db.commit()
-        await self.db.refresh(interview)
+            Updated interview with candidate link token and expiration
 
-        return interview
-
-    async def assign_interview(self, interview_id: int) -> Interview:
-        """Assign interview to candidate (generate link).
-        
-        Transitions: READY → ASSIGNED
+        Raises:
+            ValueError: If interview not found or invalid state
         """
-        interview = await self.get_interview(interview_id)
-        
+        # Get interview
+        result = await db.execute(select(Interview).where(Interview.id == interview_id))
+        interview = result.scalar_one_or_none()
+
         if not interview:
             raise ValueError(f"Interview {interview_id} not found")
 
-        # Validate state transition
-        state_machine = InterviewStateMachine(interview.status)
-        state_machine.transition_to(InterviewStatus.ASSIGNED)
-        
-        # Generate unique token
+        # Generate secure token
         interview.candidate_link_token = secrets.token_urlsafe(32)
         # Token expires in 48 hours
         interview.token_expires_at = datetime.utcnow() + timedelta(hours=48)
-        interview.status = InterviewStatus.ASSIGNED.value
-        
-        await self.db.commit()
-        await self.db.refresh(interview)
-        
+
+        # Transition to ASSIGNED status
+        InterviewStateMachine.transition(interview, InterviewStatus.ASSIGNED)
+
+        await db.commit()
+        await db.refresh(interview)
+
         return interview
 
     @staticmethod
