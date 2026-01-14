@@ -72,8 +72,8 @@ async def save_upload_file(upload_file: UploadFile, prefix: str = "") -> str:
         with open(file_path, "wb") as f:
             f.write(content)
 
-        # Return relative path
-        return str(file_path.relative_to(Path.cwd()))
+        # Return absolute path
+        return str(file_path.absolute())
 
     except Exception as e:
         raise FileUploadError(f"Failed to save file: {str(e)}") from e

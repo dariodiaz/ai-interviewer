@@ -40,6 +40,7 @@ class LLMFactory:
                 model=settings.llm_model,
                 temperature=temperature,
                 google_api_key=settings.google_api_key,
+                convert_system_message_to_human=True,
             )
 
         elif provider == "ollama":

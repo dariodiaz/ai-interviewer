@@ -187,12 +187,12 @@ class InterviewService:
             select(Interview).where(Interview.candidate_link_token == token)
         )
         interview = result.scalar_one_or_none()
-
+        
         if not interview:
             raise ValueError("Invalid interview token")
         
         # Check if token has expired
-        if interview.token_expires_at and interview.token_expires_at < datetime.utcnow():
+        if interview.token_expires_at and interview.token_expires_at < datetime.now(interview.token_expires_at.tzinfo):
             raise ValueError("Interview link has expired. Please request a new link.")
 
         # Transition to IN_PROGRESS
