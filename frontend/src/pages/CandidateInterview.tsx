@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { apiClient, Message } from '../api/client';
 
@@ -72,7 +72,7 @@ export default function CandidateInterview() {
         }
     };
 
-    const handlePaste = (e: React.ClipboardEvent) => {
+    const handlePaste = () => {
         setPasteDetected(true);
         // Allow paste but track it
     };
@@ -194,8 +194,8 @@ export default function CandidateInterview() {
                         >
                             <div
                                 className={`max-w-[80%] rounded-2xl p-4 ${message.role === 'candidate'
-                                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                                        : 'bg-white/10 backdrop-blur-lg border border-white/20 text-white'
+                                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                                    : 'bg-white/10 backdrop-blur-lg border border-white/20 text-white'
                                     }`}
                             >
                                 {message.question_number && (

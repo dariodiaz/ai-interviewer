@@ -2,18 +2,17 @@
 
 ## ⚠️ Items to Review Later
 
-### 1. Pydantic Deprecation Warning
-**Location**: `backend/app/schemas/interview.py:73`
+### 1. ~~Pydantic Deprecation Warning~~ ✅ FIXED
+**Location**: `backend/app/schemas/interview.py` and `message.py`
 
 **Issue**: 
 ```
 Support for class-based `config` is deprecated, use ConfigDict instead.
-Deprecated in Pydantic V2.0 to be removed in V3.0.
 ```
 
-**Action**: Update to use `ConfigDict` instead of class-based config
+**Status**: ✅ **FIXED** - Updated to use `ConfigDict` instead of class-based config
 
-**Priority**: Medium (works now, but will break in Pydantic V3)
+**Fixed in**: 2026-01-13 21:35
 
 ---
 
@@ -61,6 +60,24 @@ async def test_assign_interview_invalid_state(self, client):
 - [x] Fixed AsyncClient for httpx tests
 - [x] Added aiosqlite for test database
 - [x] Switched tests to SQLite in-memory
+
+---
+
+## ✅ Completed Items
+
+### Quick Wins (2026-01-13)
+
+1. **Pydantic Deprecation Warnings** ✅
+   - Fixed in `backend/app/schemas/interview.py`
+   - Fixed in `backend/app/schemas/message.py`
+   - Replaced `class Config:` with `model_config = ConfigDict(from_attributes=True)`
+   - Time: 15 minutes
+
+2. **Frontend Lint Warnings** ✅
+   - Removed unused `React` import in `AdminDashboard.tsx`
+   - Removed unused `React` import in `CandidateInterview.tsx`
+   - Removed unused parameter `e` in `handlePaste` function
+   - Time: 10 minutes
 
 ---
 

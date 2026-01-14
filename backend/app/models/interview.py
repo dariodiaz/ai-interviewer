@@ -42,6 +42,9 @@ class Interview(Base):
     candidate_link_token: Mapped[str | None] = mapped_column(
         String(255), nullable=True, unique=True, index=True
     )
+    token_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Final report (JSON)
     report_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)

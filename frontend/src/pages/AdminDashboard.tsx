@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient, Interview } from '../api/client';
 
@@ -85,8 +85,8 @@ export default function AdminDashboard() {
                             key={status}
                             onClick={() => setFilter(status)}
                             className={`bg-white/10 backdrop-blur-lg rounded-xl p-4 border transition-all duration-200 ${filter === status
-                                    ? 'border-purple-500 ring-2 ring-purple-500'
-                                    : 'border-white/20 hover:border-white/40'
+                                ? 'border-purple-500 ring-2 ring-purple-500'
+                                : 'border-white/20 hover:border-white/40'
                                 }`}
                         >
                             <div className="text-3xl font-bold text-white mb-1">{count}</div>

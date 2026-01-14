@@ -1,6 +1,6 @@
 """Interview service - business logic for interview operations."""
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 from sqlalchemy import select
@@ -142,27 +142,34 @@ class InterviewService:
             interview_id: Interview ID
 
         Returns:
-            Updated interview with candidate link token
+        await self.db.commit()
+        await self.db.refresh(interview)
 
-        Raises:
-            ValueError: If interview not found or invalid state
+        return interview
+
+    async def assign_interview(self, interview_id: int) -> Interview:
+        """Assign interview to candidate (generate link).
+        
+        Transitions: READY → ASSIGNED
         """
-        # Get interview
-        result = await db.execute(select(Interview).where(Interview.id == interview_id))
-        interview = result.scalar_one_or_none()
-
+        interview = await self.get_interview(interview_id)
+        
         if not interview:
             raise ValueError(f"Interview {interview_id} not found")
 
-        # Generate secure token
+        # Validate state transition
+        state_machine = InterviewStateMachine(interview.status)
+        state_machine.transition_to(InterviewStatus.ASSIGNED)
+        
+        # Generate unique token
         interview.candidate_link_token = secrets.token_urlsafe(32)
-
-        # Transition to ASSIGNED status
-        InterviewStateMachine.transition(interview, InterviewStatus.ASSIGNED)
-
-        await db.commit()
-        await db.refresh(interview)
-
+        # Token expires in 48 hours
+        interview.token_expires_at = datetime.utcnow() + timedelta(hours=48)
+        interview.status = InterviewStatus.ASSIGNED.value
+        
+        await self.db.commit()
+        await self.db.refresh(interview)
+        
         return interview
 
     @staticmethod
@@ -178,7 +185,7 @@ class InterviewService:
             Interview in IN_PROGRESS status
 
         Raises:
-            ValueError: If token invalid or interview already started
+            ValueError: If token invalid, expired, or interview already started
         """
         # Find interview by token
         result = await db.execute(
@@ -188,6 +195,10 @@ class InterviewService:
 
         if not interview:
             raise ValueError("Invalid interview token")
+        
+        # Check if token has expired
+        if interview.token_expires_at and interview.token_expires_at < datetime.utcnow():
+            raise ValueError("Interview link has expired. Please request a new link.")
 
         # Transition to IN_PROGRESS
         InterviewStateMachine.transition(interview, InterviewStatus.IN_PROGRESS)
