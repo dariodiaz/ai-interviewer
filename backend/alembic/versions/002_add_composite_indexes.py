@@ -1,7 +1,7 @@
 """Add composite index for interview queries
 
 Revision ID: 002_add_composite_indexes
-Revises: 001_initial_migration
+Revises: 001
 Create Date: 2026-01-13 21:45:00
 
 """
@@ -10,7 +10,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = '002_add_composite_indexes'
-down_revision = '001_initial_migration'
+down_revision = '001'
 branch_labels = None
 depends_on = None
 
