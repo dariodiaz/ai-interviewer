@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { apiClient, Interview } from '../api/client';
+import { apiClient, Interview, CostBreakdown } from '../api/client';
 
 export default function InterviewDetails() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [interview, setInterview] = useState<Interview | null>(null);
+    const [costs, setCosts] = useState<CostBreakdown | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [assigning, setAssigning] = useState(false);
     const [completing, setCompleting] = useState(false);
+    const [candidateLink, setCandidateLink] = useState<string>('');
 
     useEffect(() => {
         loadInterview();
@@ -22,6 +24,16 @@ export default function InterviewDetails() {
         try {
             const data = await apiClient.getInterview(parseInt(id));
             setInterview(data);
+
+            // Load costs if interview is completed or in progress
+            if (data.status === 'COMPLETED' || data.status === 'IN_PROGRESS') {
+                try {
+                    const costData = await apiClient.getInterviewCosts(parseInt(id));
+                    setCosts(costData);
+                } catch (err) {
+                    console.error('Failed to load costs:', err);
+                }
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load interview');
         } finally {
@@ -170,6 +182,63 @@ export default function InterviewDetails() {
                                 ))}
                             </div>
                         </div>
+                    </div>
+                )}
+
+                {/* Cost Analysis */}
+                {costs && costs.total_cost > 0 && (
+                    <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20 mb-6">
+                        <h2 className="text-2xl font-bold text-white mb-6">Cost Analysis</h2>
+
+                        {/* Summary Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                <div className="text-sm text-purple-200 mb-1">Total Cost</div>
+                                <div className="text-2xl font-bold text-white">${costs.total_cost.toFixed(6)}</div>
+                            </div>
+                            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                <div className="text-sm text-purple-200 mb-1">Total Tokens</div>
+                                <div className="text-2xl font-bold text-white">{costs.total_tokens.toLocaleString()}</div>
+                            </div>
+                            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                <div className="text-sm text-purple-200 mb-1">Cache Hit Rate</div>
+                                <div className="text-2xl font-bold text-green-400">{costs.cache_hit_rate}%</div>
+                                <div className="text-xs text-purple-300 mt-1">
+                                    {costs.cache_hits} hits / {costs.cache_misses} misses
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* By Agent Breakdown */}
+                        {Object.keys(costs.by_agent).length > 0 && (
+                            <div>
+                                <h3 className="text-lg font-semibold text-purple-200 mb-3">By Agent</h3>
+                                <div className="space-y-2">
+                                    {Object.entries(costs.by_agent).map(([agent, stats]) => (
+                                        <div key={agent} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="font-semibold text-white">{agent}</span>
+                                                <span className="text-purple-200">${stats.cost.toFixed(6)}</span>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-4 text-sm">
+                                                <div>
+                                                    <span className="text-purple-300">Calls:</span>
+                                                    <span className="text-white ml-2">{stats.calls}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-purple-300">Tokens:</span>
+                                                    <span className="text-white ml-2">{stats.tokens.toLocaleString()}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-purple-300">Cached:</span>
+                                                    <span className="text-green-400 ml-2">{stats.cached}/{stats.calls}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 

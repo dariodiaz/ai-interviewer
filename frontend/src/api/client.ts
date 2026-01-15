@@ -68,6 +68,40 @@ export interface SendMessageResponse {
     next_question_number?: number;
 }
 
+export interface CostBreakdown {
+    interview_id: number;
+    total_cost: number;
+    total_tokens: number;
+    cache_hits: number;
+    cache_misses: number;
+    cache_hit_rate: number;
+    by_agent: Record<string, {
+        calls: number;
+        tokens: number;
+        cost: number;
+        cached: number;
+    }>;
+}
+
+export interface CostStatistics {
+    total_cost: number;
+    total_tokens: number;
+    total_calls: number;
+    cache_hits: number;
+    cache_misses: number;
+    cache_hit_rate: number;
+}
+
+export interface CacheStats {
+    size: number;
+    max_size: number;
+    hits: number;
+    misses: number;
+    total_requests: number;
+    hit_rate: number;
+    default_ttl: number;
+}
+
 class ApiClient {
     private baseUrl: string;
 
@@ -212,6 +246,18 @@ class ApiClient {
             method: 'POST',
             body: JSON.stringify(data),
         });
+    }
+
+    async getInterviewCosts(id: number): Promise<CostBreakdown> {
+        return this.request<CostBreakdown>(`/interviews/${id}/costs`);
+    }
+
+    async getCostStatistics(): Promise<CostStatistics> {
+        return this.request<CostStatistics>('/interviews/stats/costs');
+    }
+
+    async getCacheStats(): Promise<CacheStats> {
+        return this.request<CacheStats>('/interviews/cache/stats');
     }
 
     // Health check
