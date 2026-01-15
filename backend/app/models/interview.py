@@ -61,6 +61,9 @@ class Interview(Base):
     messages: Mapped[list["Message"]] = relationship(
         "Message", back_populates="interview", cascade="all, delete-orphan"
     )
+    llm_usage: Mapped[list["LLMUsage"]] = relationship(
+        "LLMUsage", back_populates="interview", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         """String representation."""

@@ -22,7 +22,7 @@ class DocumentAnalysisAgent(BaseAgent):
         self, resume_text: str, role_description_text: str, job_offering_text: str
     ) -> MatchAnalysis:
         """
-        Analyze the match between candidate and role.
+        Analyze the match between candidate and role (synchronous version).
 
         Args:
             resume_text: Extracted text from candidate's resume
@@ -58,6 +58,7 @@ class DocumentAnalysisAgent(BaseAgent):
         chain = prompt | self.llm | self.parser
 
         # Execute the analysis with retry logic
+        from app.config import settings
         result = self.invoke_with_retry(
             chain,
             {
@@ -66,6 +67,67 @@ class DocumentAnalysisAgent(BaseAgent):
                 "job_offering_text": validated.job_offering_text,
                 "format_instructions": self.parser.get_format_instructions(),
             },
+            model=settings.llm_model,
+        )
+
+        return result
+
+    async def analyze_async(
+        self,
+        resume_text: str,
+        role_description_text: str,
+        job_offering_text: str,
+        db=None,
+        interview_id: int = None,
+    ) -> MatchAnalysis:
+        """
+        Analyze the match between candidate and role (async with cost tracking).
+
+        Args:
+            resume_text: Extracted text from candidate's resume
+            role_description_text: Extracted text from role description
+            job_offering_text: Extracted text from job offering
+            db: Database session for cost tracking
+            interview_id: Interview ID for cost tracking
+
+        Returns:
+            MatchAnalysis with score, summary, and focus areas
+        """
+        # Validate inputs
+        validated = DocumentInput(
+            resume_text=resume_text,
+            role_description_text=role_description_text,
+            job_offering_text=job_offering_text,
+        )
+
+        # Create the prompt with format instructions
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", "You are an expert technical recruiter."),
+                (
+                    "human",
+                    DOCUMENT_ANALYSIS_PROMPT
+                    + "\n\n{format_instructions}\n\nProvide your analysis:",
+                ),
+            ]
+        )
+
+        # Create the chain
+        chain = prompt | self.llm | self.parser
+
+        # Execute the analysis with retry logic and cost tracking
+        from app.config import settings
+        result = await self.invoke_with_retry_async(
+            chain,
+            {
+                "resume_text": validated.resume_text,
+                "role_description_text": validated.role_description_text,
+                "job_offering_text": validated.job_offering_text,
+                "format_instructions": self.parser.get_format_instructions(),
+            },
+            model=settings.llm_model,
+            db=db,
+            interview_id=interview_id,
         )
 
         return result

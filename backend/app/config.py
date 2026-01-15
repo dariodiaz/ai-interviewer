@@ -5,8 +5,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
-
     # Database
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/ai_interviewer"
 
@@ -36,6 +34,16 @@ class Settings(BaseSettings):
     # Interview Configuration
     default_target_questions: int = 8
     default_difficulty_start: int = 5
+
+    # Cache settings
+    cache_enabled: bool = True
+    cache_ttl_seconds: int = 3600  # 1 hour
+    cache_max_size: int = 1000
+
+    # Cost tracking
+    cost_tracking_enabled: bool = True
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
 settings = Settings()

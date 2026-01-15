@@ -232,3 +232,142 @@ async def complete_interview(
         return interview
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/{interview_id}/costs")
+@limiter.limit(RATE_LIMIT_ADMIN)
+async def get_interview_costs(
+    request: Request,
+    interview_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(require_admin),
+):
+    """
+    Get cost breakdown for a specific interview.
+
+    Args:
+        interview_id: Interview ID
+        db: Database session
+
+    Returns:
+        Cost breakdown with token usage and estimated costs
+    """
+    from sqlalchemy import select, func
+    from app.models.llm_usage import LLMUsage
+
+    # Get all LLM usage for this interview
+    result = await db.execute(
+        select(LLMUsage).where(LLMUsage.interview_id == interview_id)
+    )
+    usage_records = result.scalars().all()
+
+    if not usage_records:
+        return {
+            "interview_id": interview_id,
+            "total_cost": 0.0,
+            "total_tokens": 0,
+            "cache_hits": 0,
+            "cache_misses": 0,
+            "by_agent": {},
+        }
+
+    # Aggregate by agent
+    by_agent = {}
+    total_cost = 0.0
+    total_tokens = 0
+    cache_hits = 0
+    cache_misses = 0
+
+    for record in usage_records:
+        if record.cached:
+            cache_hits += 1
+        else:
+            cache_misses += 1
+
+        total_cost += record.estimated_cost
+        total_tokens += record.total_tokens
+
+        if record.agent_name not in by_agent:
+            by_agent[record.agent_name] = {
+                "calls": 0,
+                "tokens": 0,
+                "cost": 0.0,
+                "cached": 0,
+            }
+
+        by_agent[record.agent_name]["calls"] += 1
+        by_agent[record.agent_name]["tokens"] += record.total_tokens
+        by_agent[record.agent_name]["cost"] += record.estimated_cost
+        if record.cached:
+            by_agent[record.agent_name]["cached"] += 1
+
+    return {
+        "interview_id": interview_id,
+        "total_cost": round(total_cost, 6),
+        "total_tokens": total_tokens,
+        "cache_hits": cache_hits,
+        "cache_misses": cache_misses,
+        "cache_hit_rate": round((cache_hits / (cache_hits + cache_misses) * 100), 2) if (cache_hits + cache_misses) > 0 else 0,
+        "by_agent": by_agent,
+    }
+
+
+@router.get("/stats/costs")
+@limiter.limit(RATE_LIMIT_ADMIN)
+async def get_cost_statistics(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(require_admin),
+):
+    """
+    Get aggregate cost statistics across all interviews.
+
+    Returns:
+        Aggregate cost statistics
+    """
+    from sqlalchemy import select, func
+    from app.models.llm_usage import LLMUsage
+
+    # Get aggregate statistics
+    result = await db.execute(
+        select(
+            func.sum(LLMUsage.estimated_cost).label("total_cost"),
+            func.sum(LLMUsage.total_tokens).label("total_tokens"),
+            func.count(LLMUsage.id).label("total_calls"),
+            func.sum(func.cast(LLMUsage.cached, db.bind.dialect.NUMERIC)).label("cache_hits"),
+        )
+    )
+    stats = result.one()
+
+    total_cost = float(stats.total_cost or 0)
+    total_tokens = int(stats.total_tokens or 0)
+    total_calls = int(stats.total_calls or 0)
+    cache_hits = int(stats.cache_hits or 0)
+    cache_misses = total_calls - cache_hits
+
+    return {
+        "total_cost": round(total_cost, 6),
+        "total_tokens": total_tokens,
+        "total_calls": total_calls,
+        "cache_hits": cache_hits,
+        "cache_misses": cache_misses,
+        "cache_hit_rate": round((cache_hits / total_calls * 100), 2) if total_calls > 0 else 0,
+    }
+
+
+@router.get("/cache/stats")
+@limiter.limit(RATE_LIMIT_ADMIN)
+async def get_cache_statistics(
+    request: Request,
+    current_user: dict = Depends(require_admin),
+):
+    """
+    Get cache statistics.
+
+    Returns:
+        Cache statistics including hit rate and size
+    """
+    from app.utils.llm_cache import get_cache
+
+    cache = get_cache()
+    return cache.get_stats()
