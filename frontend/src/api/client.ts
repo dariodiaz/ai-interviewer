@@ -2,8 +2,6 @@
  * API client for AI Interviewer backend
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
 export interface Interview {
     id: number;
     status: string;
@@ -105,12 +103,12 @@ export interface CacheStats {
 class ApiClient {
     private baseUrl: string;
 
-    constructor(baseUrl: string = API_BASE_URL) {
-        this.baseUrl = baseUrl;
+    constructor() {
+        this.baseUrl = import.meta.env?.VITE_API_URL || 'http://localhost:8000';
     }
 
     private getAuthToken(): string | null {
-        return localStorage.getItem('auth_token');
+        return localStorage.getItem('token');
     }
 
     private async request<T>(
@@ -121,9 +119,9 @@ class ApiClient {
 
         // Get auth token and add to headers if available
         const token = this.getAuthToken();
-        const headers: HeadersInit = {
+        const headers: Record<string, string> = {
             'Content-Type': 'application/json',
-            ...options.headers,
+            ...(options.headers as Record<string, string> || {}),
         };
 
         if (token) {
