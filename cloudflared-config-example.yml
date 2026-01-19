@@ -1,0 +1,25 @@
+tunnel: <YOUR_TUNNEL_UUID>
+credentials-file: /root/.cloudflared/<YOUR_TUNNEL_UUID>.json
+
+ingress:
+  # Route /api/* to the Backend Service
+  # Note: The frontend nginx is configured to proxy /api/ to the backend internally.
+  # So we only need to expose the frontend service externally if we want a single domain.
+  # However, if you want direct API access or if the internal proxying fails, you can map it here.
+  # BUT, the current setup is: User -> Cloudflare -> Frontend (Nginx) -> Backend
+  
+  # Main Application (Frontend + API via proxy)
+  - hostname: ai-interviewer.yourdomain.com
+    service: http://frontend.ai-interviewer.svc.cluster.local:80
+  
+  # Catch-all
+  - service: http_status:404
+
+# Note:
+# 1. Replace <YOUR_TUNNEL_UUID> with your actual Tunnel UUID.
+# 2. Replace ai-interviewer.yourdomain.com with your domain.
+# 3. 'frontend.ai-interviewer.svc.cluster.local' is the internal DNS name of the frontend service.
+#    This works if cloudflared is running inside the cluster (as a pod).
+#    If cloudflared is running on the HOST (outside k3s), you must use the ClusterIP or NodePort.
+#    To find ClusterIP: kubectl get svc -n ai-interviewer
+#    Example: service: http://10.43.x.x:80

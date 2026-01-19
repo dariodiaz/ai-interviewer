@@ -13,6 +13,8 @@ spec:
       labels:
         app: backend
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: archlimpo
       initContainers:
       - name: wait-for-db
         image: postgres:15-alpine
@@ -20,10 +22,21 @@ spec:
         envFrom:
         - secretRef:
             name: app-secrets
+      - name: run-migrations
+        image: ai-interviewer-backend:latest
+        imagePullPolicy: IfNotPresent
+        command: ['alembic', 'upgrade', 'head']
+        envFrom:
+        - secretRef:
+            name: app-secrets
+        env:
+        - name: DATABASE_URL
+          value: "postgresql+asyncpg://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
       containers:
       - name: backend
         image: ai-interviewer-backend:latest # Local image or your registry
         imagePullPolicy: IfNotPresent # Important for local k3s images
+        command: ["gunicorn", "-w", "2", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "--bind", "0.0.0.0:8000"]
         ports:
         - containerPort: 8000
         envFrom:
@@ -34,10 +47,10 @@ spec:
           value: "postgresql+asyncpg://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
         resources:
           requests:
-            memory: "256Mi"
+            memory: "512Mi"
             cpu: "200m"
           limits:
-            memory: "512Mi"
+            memory: "2Gi"
             cpu: "1000m"
 ---
 apiVersion: v1
