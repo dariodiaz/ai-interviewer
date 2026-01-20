@@ -21,6 +21,9 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
+        env:
+        - name: VITE_API_URL
+          value: "/api" # Change this if your API is on a different subdomain (e.g., https://api.example.com/api)
         resources:
           requests:
             memory: "64Mi"

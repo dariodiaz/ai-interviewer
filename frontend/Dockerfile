@@ -22,7 +22,12 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Copy env script for runtime configuration
+COPY env.sh /docker-entrypoint.d/env.sh
+RUN chmod +x /docker-entrypoint.d/env.sh
+
 # Expose port
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+# Start Nginx using the script to generate config
+CMD ["/bin/sh", "-c", "/docker-entrypoint.d/env.sh && nginx -g 'daemon off;'"]

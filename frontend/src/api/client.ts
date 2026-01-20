@@ -104,7 +104,9 @@ class ApiClient {
     private baseUrl: string;
 
     constructor() {
-        this.baseUrl = import.meta.env?.VITE_API_URL || '/api';
+        // Allow runtime configuration via window._env_
+        const runtimeUrl = (window as any)._env_?.VITE_API_URL;
+        this.baseUrl = runtimeUrl || import.meta.env?.VITE_API_URL || '/api';
     }
 
     private getAuthToken(): string | null {
