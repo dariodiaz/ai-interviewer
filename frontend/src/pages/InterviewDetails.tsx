@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient, Interview, CostBreakdown } from '../api/client';
 
+import LogoutButton from '../components/LogoutButton';
+
 export default function InterviewDetails() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -109,12 +111,15 @@ export default function InterviewDetails() {
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20 mb-6">
                     <div className="flex items-center justify-between mb-4">
                         <h1 className="text-3xl font-bold text-white">Interview #{interview.id}</h1>
-                        <span
-                            className={`px-4 py-2 rounded-full text-white font-semibold ${statusColors[interview.status as keyof typeof statusColors]
-                                }`}
-                        >
-                            {interview.status}
-                        </span>
+                        <div className="flex items-center gap-4">
+                            <LogoutButton />
+                            <span
+                                className={`px-4 py-2 rounded-full text-white font-semibold ${statusColors[interview.status as keyof typeof statusColors]
+                                    }`}
+                            >
+                                {interview.status}
+                            </span>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 text-white/80">

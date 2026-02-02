@@ -2,6 +2,8 @@ import { useState, FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from '../api/client';
 
+import LogoutButton from '../components/LogoutButton';
+
 export default function UploadDocuments() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -61,7 +63,10 @@ export default function UploadDocuments() {
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
             <div className="max-w-2xl mx-auto">
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
-                    <h1 className="text-3xl font-bold text-white mb-2">Upload Documents</h1>
+                    <div className="flex items-center justify-between mb-2">
+                        <h1 className="text-3xl font-bold text-white">Upload Documents</h1>
+                        <LogoutButton />
+                    </div>
                     <p className="text-purple-200 mb-8">
                         Upload the required documents for Interview #{id}
                     </p>

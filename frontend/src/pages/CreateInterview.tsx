@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../api/client';
 
+import LogoutButton from '../components/LogoutButton';
+
 export default function CreateInterview() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -102,25 +104,28 @@ export default function CreateInterview() {
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
             <div className="max-w-2xl mx-auto">
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
-                    <button
-                        onClick={() => navigate('/admin')}
-                        className="mb-6 flex items-center text-purple-200 hover:text-white transition-colors duration-200"
-                    >
-                        <svg
-                            className="w-5 h-5 mr-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                    <div className="flex items-center justify-between mb-6">
+                        <button
+                            onClick={() => navigate('/admin')}
+                            className="flex items-center text-purple-200 hover:text-white transition-colors duration-200"
                         >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                            />
-                        </svg>
-                        Back to Dashboard
-                    </button>
+                            <svg
+                                className="w-5 h-5 mr-2"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                                />
+                            </svg>
+                            Back to Dashboard
+                        </button>
+                        <LogoutButton />
+                    </div>
                     <h1 className="text-3xl font-bold text-white mb-2">Create New Interview</h1>
                     <p className="text-purple-200 mb-8">
                         Configure interview settings and upload required documents

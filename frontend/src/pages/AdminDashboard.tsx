@@ -5,6 +5,8 @@ import { apiClient, Interview, CostStatistics } from '../api/client';
 type SortField = 'id' | 'created_at';
 type SortDirection = 'asc' | 'desc';
 
+import LogoutButton from '../components/LogoutButton';
+
 export default function AdminDashboard() {
     const navigate = useNavigate();
     const [interviews, setInterviews] = useState<Interview[]>([]);
@@ -113,21 +115,24 @@ export default function AdminDashboard() {
                         <h1 className="text-4xl font-bold text-white mb-2">Interview Dashboard</h1>
                         <p className="text-purple-200">Manage and monitor all interviews</p>
                     </div>
-                    {costStats && (
-                        <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
-                            <div className="text-sm text-purple-200 mb-1">Total API Cost</div>
-                            <div className="text-2xl font-bold text-white">${costStats.total_cost.toFixed(4)}</div>
-                            <div className="text-xs text-purple-300 mt-1">
-                                {costStats.total_tokens.toLocaleString()} tokens | {costStats.cache_hit_rate}% cached
+                    <div className="flex items-center gap-4">
+                        {costStats && (
+                            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20">
+                                <div className="text-sm text-purple-200 mb-1">Total API Cost</div>
+                                <div className="text-2xl font-bold text-white">${costStats.total_cost.toFixed(4)}</div>
+                                <div className="text-xs text-purple-300 mt-1">
+                                    {costStats.total_tokens.toLocaleString()} tokens | {costStats.cache_hit_rate}% cached
+                                </div>
                             </div>
-                        </div>
-                    )}
-                    <button
-                        onClick={() => navigate('/admin/create')}
-                        className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 font-semibold shadow-lg"
-                    >
-                        + Create Interview
-                    </button>
+                        )}
+                        <button
+                            onClick={() => navigate('/admin/create')}
+                            className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 font-semibold shadow-lg"
+                        >
+                            + Create Interview
+                        </button>
+                        <LogoutButton />
+                    </div>
                 </div>
 
                 {error && (
